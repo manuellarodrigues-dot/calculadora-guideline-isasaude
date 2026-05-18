@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora Operacional</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --blue:      #004474;
+  --blue-mid:  #005a9e;
+  --blue-pale: #e8f2fa;
+  --blue-lt:   #ccdff0;
+  --pink:      #ED1E79;
+  --green:     #1a6e3c;
+  --green-bg:  #e4f5ec;
+  --green-bdr: #7fd5a6;
+  --red:       #b91c1c;
+  --red-bg:    #fef2f2;
+  --red-bdr:   #fca5a5;
+  --amber:     #92400e;
+  --amber-bg:  #fffbeb;
+  --amber-bdr: #fcd34d;
+  --text:      #0f1e2e;
+  --muted:     #5a6d80;
+  --border:    #c8d8e8;
+  --bg:        #edf2f7;
+  --white:     #fff;
+  --yin:       #fffde7;
+}
+body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); font-size:13px; line-height:1.45; min-height:100vh; }
+
+/* HEADER */
+.app-header { background:var(--blue); height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 28px; position:sticky; top:0; z-index:300; box-shadow:0 2px 14px rgba(0,0,0,.28); }
+.brand { display:flex; align-items:center; gap:12px; }
+.brand-icon { width:34px;height:34px;background:var(--pink);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;flex-shrink:0; }
+.brand-name { color:#fff;font-size:16px;font-weight:600;letter-spacing:-.3px; }
+.brand-sub  { color:rgba(255,255,255,.5);font-size:11px; }
+.header-right { display:flex;align-items:center;gap:10px; }
+.header-tag { background:var(--pink);color:#fff;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:4px 12px;border-radius:20px; }
+.gs-badge { display:inline-flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,.75);padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.25); }
+
+/* CONFIG BANNER */
+.config-banner { background:#fff3cd;border-bottom:2px solid #ffc107;padding:10px 28px;display:flex;align-items:center;gap:12px;font-size:12px;color:#5f4200; }
+.config-banner strong { font-weight:700; }
+.config-banner code { background:#f5e58a;padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px; }
+.config-banner.hidden { display:none; }
+
+/* TABS */
+.tabs-bar { background:var(--white); border-bottom:2px solid var(--border); display:flex; padding:0 28px; position:sticky; top:56px; z-index:200; box-shadow:0 2px 8px rgba(0,68,116,.06); }
+.tab-btn { padding:14px 22px; font-size:13px; font-weight:600; color:var(--muted); background:none; border:none; border-bottom:3px solid transparent; cursor:pointer; transition:all .18s; margin-bottom:-2px; display:flex;align-items:center;gap:7px; }
+.tab-btn:hover { color:var(--blue); }
+.tab-btn.active { color:var(--blue); border-bottom-color:var(--pink); }
+.tab-count { background:var(--pink);color:#fff;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700; }
+
+.wrap { max-width:1300px; margin:0 auto; padding:24px 20px 60px; }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+/* CARDS */
+.panel-card { background:var(--white); border:1px solid var(--border); border-radius:10px; box-shadow:0 2px 10px rgba(0,68,116,.07); padding:20px 24px; margin-bottom:16px; }
+.panel-card-title { font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--blue);margin-bottom:14px; }
+
+/* SELECTOR */
+.sel-row { display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap; }
+.sel-group { display:flex;flex-direction:column;gap:5px; }
+.sel-group label { font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px; }
+.sel-group select, .sel-group input[type=text], .sel-group input[type=url] {
+  padding:9px 13px;border:1.5px solid var(--border);border-radius:7px;
+  font-family:'Inter',sans-serif;font-size:13px;color:var(--text);
+  background:var(--yin);outline:none;transition:border-color .15s,box-shadow .15s;
+}
+.sel-group select { min-width:210px;cursor:pointer; }
+.sel-group input[type=text],.sel-group input[type=url] { min-width:260px; }
+.sel-group select:focus,.sel-group input:focus { border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,68,116,.12); }
+.sel-group select:disabled { background:#f0f0f0;color:#aaa;cursor:not-allowed; }
+
+/* BUTTONS */
+.btn { display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:7px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .15s;white-space:nowrap;height:40px; }
+.btn-pink  { background:var(--pink);color:#fff; }
+.btn-pink:hover  { background:#d41a6d;transform:translateY(-1px);box-shadow:0 4px 14px rgba(237,30,121,.35); }
+.btn-blue  { background:var(--blue);color:#fff; }
+.btn-blue:hover  { background:var(--blue-mid); }
+.btn-ghost { background:#fff;color:var(--blue);border:1.5px solid var(--border); }
+.btn-ghost:hover { background:var(--blue-pale);border-color:var(--blue); }
+.btn-sm { padding:6px 14px;font-size:12px;height:34px; }
+.btn-green { background:var(--green);color:#fff; }
+.btn-green:hover { background:#155c32; }
+.btn:disabled { opacity:.5;cursor:not-allowed;transform:none!important;box-shadow:none!important; }
+
+/* GUIDE */
+.guide-box { background:var(--blue-pale);border:1px solid var(--blue-lt);border-radius:9px;padding:13px 18px;margin-bottom:16px;font-size:12px;color:var(--blue);display:flex;gap:11px;align-items:flex-start; }
+.guide-steps { display:flex;gap:18px;flex-wrap:wrap;margin-top:5px; }
+.guide-step  { display:flex;align-items:center;gap:6px; }
+.dot { width:6px;height:6px;border-radius:50%;background:var(--pink);flex-shrink:0; }
+
+/* TOTAL */
+.total-block { background:var(--blue);color:#fff;border-radius:10px;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:16px; }
+.total-col { display:flex;flex-direction:column; }
+.total-label { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;opacity:.65;margin-bottom:3px; }
+.total-val   { font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600; }
+.total-val.pos { color:#7fdfaa; }
+.total-val.neg { color:#ff9999; }
+
+/* TABLE */
+.table-wrap { background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(0,68,116,.07);margin-bottom:16px; }
+.table-toolbar { display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-bottom:1px solid var(--border);background:var(--blue-pale); }
+.toolbar-l { font-size:13px;font-weight:700;color:var(--blue);display:flex;align-items:center;gap:7px; }
+.toolbar-r { display:flex;gap:8px; }
+
+.calc-table { width:100%;border-collapse:collapse; }
+.calc-table thead th { background:var(--blue);color:#fff;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:10px 14px;text-align:left;border-right:1px solid rgba(255,255,255,.1); }
+.calc-table thead th.r { text-align:right; }
+.calc-table thead th.c { text-align:center; }
+.calc-table thead th small { font-size:9px;font-weight:400;text-transform:none;opacity:.72;display:block;margin-top:1px; }
+.calc-table tbody tr { border-bottom:1px solid var(--border);transition:background .1s; }
+.calc-table tbody tr:hover { background:#f5faff; }
+.calc-table tbody td { padding:8px 14px;vertical-align:middle;border-right:1px solid #e5edf5; }
+.calc-table tbody td:last-child { border-right:none; }
+.calc-table tbody td.r { text-align:right; }
+.calc-table tbody td.c { text-align:center; }
+
+.inp-qty,.inp-real { width:100%;padding:6px 9px;background:var(--yin);border:1.5px solid #ddc500;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s; }
+.inp-qty { text-align:center; }
+.inp-real{ text-align:right; }
+.inp-qty:focus,.inp-real:focus { border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,68,116,.12);background:#fffef0; }
+.inp-qty::placeholder,.inp-real::placeholder { color:#bbb;font-family:'Inter',sans-serif; }
+
+.mono    { font-family:'JetBrains Mono',monospace;font-size:13px; }
+.c-blue  { color:var(--blue);font-weight:500; }
+.c-pink  { color:var(--pink);font-weight:500; }
+.c-green { color:var(--green);font-weight:600; }
+.c-red   { color:var(--red);font-weight:600; }
+.c-muted { color:var(--muted); }
+
+.badge { display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap; }
+.badge-ok      { background:var(--green-bg);color:var(--green);border:1px solid var(--green-bdr); }
+.badge-fail    { background:var(--red-bg);color:var(--red);border:1px solid var(--red-bdr); }
+.badge-pending { background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bdr); }
+
+/* SAVE BAR */
+.save-bar { background:var(--white);border:1px solid var(--border);border-radius:10px;padding:16px 22px;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,68,116,.07); }
+.save-bar-title { font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--blue);margin-bottom:14px; }
+.save-bar-fields { display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap; }
+
+/* HISTORY */
+.hist-filters { display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px; }
+.hist-filters select,.hist-filters input { padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);background:#fff;outline:none; }
+.hist-filters select:focus,.hist-filters input:focus { border-color:var(--blue); }
+.hist-list { display:flex;flex-direction:column;gap:14px; }
+.hist-card { background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 1px 8px rgba(0,68,116,.06);overflow:hidden; }
+.hist-card-header { background:var(--blue-pale);border-bottom:1px solid var(--blue-lt);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px; }
+.hist-card-name { font-size:15px;font-weight:700;color:var(--blue); }
+.hist-card-meta { display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:5px; }
+.chip { font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--blue);color:#fff; }
+.chip.pink { background:var(--pink); }
+.chip.purple { background:#6c47b8; }
+.hist-card-body { padding:16px 18px; }
+
+.hist-table { width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px; }
+.hist-table thead th { background:var(--blue-pale);color:var(--blue);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:7px 12px;text-align:left;border-bottom:1px solid var(--blue-lt); }
+.hist-table thead th.r { text-align:right; }
+.hist-table tbody tr { border-bottom:1px solid var(--border); }
+.hist-table tbody td { padding:7px 12px;vertical-align:middle; }
+.hist-table tbody td.r { text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px; }
+.hist-totals { display:flex;gap:20px;flex-wrap:wrap;background:var(--blue);border-radius:8px;padding:12px 18px;align-items:center; }
+.htot-col { display:flex;flex-direction:column; }
+.htot-label { font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px; }
+.htot-val   { font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;color:#fff; }
+.htot-val.pos { color:#7fdfaa; }
+.htot-val.neg { color:#ff9999; }
+
+/* LOADING */
+.loading-overlay { position:fixed;inset:0;background:rgba(4,16,36,.55);z-index:500;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px); }
+.loading-box { background:#fff;border-radius:14px;padding:32px 40px;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.22);min-width:260px; }
+.loading-spinner { width:40px;height:40px;border:4px solid var(--blue-lt);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px; }
+.loading-text { color:var(--blue);font-weight:600;font-size:14px; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* EMPTY */
+.empty-state { padding:52px 24px;text-align:center;color:var(--muted); }
+.empty-state .ei { font-size:44px;margin-bottom:12px; }
+.empty-state h3  { font-size:15px;color:var(--blue);margin-bottom:6px; }
+
+/* TOAST */
+.toast { position:fixed;bottom:28px;right:28px;z-index:999;color:#fff;padding:12px 22px;border-radius:9px;font-size:13px;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.2);opacity:0;transform:translateY(10px);transition:opacity .25s,transform .25s;pointer-events:none; }
+.toast.show { opacity:1;transform:none; }
+.toast.success { background:var(--green); }
+.toast.error   { background:var(--red); }
+.toast.info    { background:var(--blue-mid); }
+
+/* CONFIG PANEL */
+.config-panel { background:var(--white);border:2px solid #ffc107;border-radius:10px;padding:20px 24px;margin-bottom:16px; }
+.config-panel h3 { color:var(--blue);font-size:14px;font-weight:700;margin-bottom:4px; }
+.config-panel p  { font-size:12px;color:var(--muted);margin-bottom:14px; }
+.config-url-input { width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:7px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);outline:none;margin-bottom:10px; }
+.config-url-input:focus { border-color:var(--blue); }
+
+@media(max-width:800px){.wrap{padding:14px 10px 40px;}.app-header{padding:0 14px;}.tabs-bar{padding:0 12px;}.table-wrap{overflow-x:auto;}.calc-table{min-width:760px;}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.fade-in { animation:fadeUp .22s ease; }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay" style="display:none">
+  <div class="loading-box">
+    <div class="loading-spinner"></div>
+    <div class="loading-text" id="loadingText">Aguarde...</div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="brand">
+    <div class="brand-icon">C</div>
+    <div>
+      <div class="brand-name">Calculadora Operacional</div>
+      <div class="brand-sub">Histórico compartilhado via Google Sheets</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="gs-badge">📊 Google Sheets</span>
+    <span class="header-tag">Uso Interno</span>
+  </div>
+</header>
+
+<!-- CONFIG BANNER (some when URL not configured) -->
+
+<!-- TABS -->
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('calc',this)">🧮 Calculadora</button>
+  <button class="tab-btn" onclick="switchTab('hist',this)">
+    📂 Histórico <span class="tab-count" id="histCount">—</span>
+  </button>
+</div>
+
+<div class="wrap">
+
+<!-- ══ TAB CALCULADORA ══ -->
+<div id="tab-calc" class="tab-panel active">
+
+  <div class="panel-card">
+    <div class="panel-card-title">⚙️ Selecione a Operadora e a Cidade</div>
+    <div class="sel-row">
+      <div class="sel-group">
+        <label>Operadora</label>
+        <select id="selOp" onchange="onOpChange()">
+          <option value="">— Selecione —</option>
+          <option>CNU</option><option>Prevent Senior</option>
+          <option>Unimed SJ Rio Preto</option><option>Unimed Goiás</option>
+          <option>SP Capital</option>
+        </select>
+      </div>
+      <div class="sel-group">
+        <label>Cidade / Modalidade</label>
+        <select id="selCidade" disabled>
+          <option value="">— Selecione a Operadora —</option>
+        </select>
+      </div>
+      <button class="btn btn-pink" onclick="loadCalc()">✔ Carregar</button>
+    </div>
+  </div>
+
+  <div class="guide-box" id="guideBox">
+    <span style="font-size:18px;flex-shrink:0">💡</span>
+    <div>
+      <strong>Como usar:</strong>
+      <div class="guide-steps">
+        <div class="guide-step"><span class="dot"></span>Selecione <strong>Operadora</strong></div>
+        <div class="guide-step"><span class="dot"></span>Selecione <strong>Cidade</strong></div>
+        <div class="guide-step"><span class="dot"></span>Clique em <strong>Carregar</strong></div>
+        <div class="guide-step"><span class="dot"></span>Preencha campos <span style="background:var(--yin);padding:1px 5px;border-radius:3px;border:1px solid #ddc500;font-weight:600">amarelos</span></div>
+        <div class="guide-step"><span class="dot"></span>Informe <strong>Paciente + Responsável</strong> e salve</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABELA -->
+  <div id="tableSection" style="display:none">
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <div class="toolbar-l">📋 <span id="tableLabel">—</span></div>
+        <div class="toolbar-r">
+          <button class="btn btn-ghost btn-sm" onclick="clearInputs()">🗑 Limpar</button>
+          <button class="btn btn-ghost btn-sm" onclick="exportCSV()">⬇ CSV</button>
+        </div>
+      </div>
+      <div id="tableArea"></div>
+    </div>
+  </div>
+
+  <!-- TOTAL -->
+  <div id="totalSection" style="display:none">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--blue);margin-bottom:10px;">🏁 Total Consolidado</div>
+    <div class="total-block">
+      <div class="total-col"><span class="total-label">Custo Total Guideline</span><span class="total-val" id="tot-guide">—</span></div>
+      <div class="total-col"><span class="total-label">Custo Total Fidelizado</span><span class="total-val" id="tot-fid">—</span></div>
+      <div class="total-col"><span class="total-label">Diferença</span><span class="total-val" id="tot-diff">—</span></div>
+      <div class="total-col"><span class="total-label">Status Geral</span><span id="tot-status" class="badge badge-pending">⏳ Pendente</span></div>
+    </div>
+  </div>
+
+  <!-- SAVE BAR -->
+  <div class="save-bar" id="saveBar" style="display:none">
+    <div class="save-bar-title">💾 Salvar no Histórico Compartilhado (Google Sheets)</div>
+    <div class="save-bar-fields">
+      <div class="sel-group">
+        <label>Nome do Paciente</label>
+        <input type="text" id="inpPaciente" placeholder="Ex: João da Silva" maxlength="80">
+      </div>
+      <div class="sel-group">
+        <label>Responsável</label>
+        <select id="selResp">
+          <option value="">— Selecione —</option>
+          <option>Amanda</option>
+          <option>Ana Paula</option>
+          <option>Beatriz</option>
+          <option>Caio</option>
+          <option>Camila Freire</option>
+          <option>Camila Sousa</option>
+          <option>Caroline</option>
+          <option>Emily</option>
+          <option>Ingrid</option>
+          <option>Jefferson</option>
+          <option>Jennifer</option>
+          <option>Jhennifer</option>
+          <option>Juliana</option>
+          <option>Manuella</option>
+          <option>Stephanie</option>
+          <option>Taina</option>
+          <option>Tamiris</option>
+          <option>Thabata</option>
+          <option>Thiago</option>
+          <option>Yasmim</option>
+        </select>
+      </div>
+      <div class="sel-group">
+        <label>Exceção</label>
+        <select id="selExcecao" onchange="onExcecaoChange()">
+          <option value="">— Nenhuma —</option>
+          <option value="Negociação Pontual">Negociação Pontual</option>
+        </select>
+      </div>
+      <div class="sel-group" id="justificativaGroup" style="display:none;flex:1 1 240px">
+        <label>Justificativa <span style="color:var(--red)">*</span></label>
+        <input type="text" id="inpJustificativa" placeholder="Descreva a justificativa da exceção..." maxlength="200">
+      </div>
+      <button class="btn btn-blue" id="btnSave" onclick="saveRecord()">💾 Salvar</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ TAB HISTÓRICO ══ -->
+<div id="tab-hist" class="tab-panel">
+
+  <div class="panel-card">
+    <div class="panel-card-title">🔍 Filtrar Histórico</div>
+    <div class="hist-filters">
+      <input type="text" id="filtPac" placeholder="Buscar paciente..." oninput="applyFilters()">
+      <select id="filtResp" onchange="applyFilters()">
+        <option value="">Todos os Responsáveis</option>
+        <option>Amanda</option><option>Ana Paula</option><option>Beatriz</option>
+        <option>Caio</option><option>Camila Freire</option><option>Camila Sousa</option>
+        <option>Caroline</option><option>Emily</option><option>Ingrid</option>
+        <option>Jefferson</option><option>Jennifer</option><option>Jhennifer</option>
+        <option>Juliana</option><option>Manuella</option><option>Stephanie</option>
+        <option>Taina</option><option>Tamiris</option><option>Thabata</option>
+        <option>Thiago</option><option>Yasmim</option>
+      </select>
+      <select id="filtOp" onchange="applyFilters()">
+        <option value="">Todas as Operadoras</option>
+        <option>CNU</option><option>Prevent Senior</option>
+        <option>Unimed SJ Rio Preto</option><option>Unimed Goiás</option><option>SP Capital</option>
+      </select>
+      <select id="filtStatus" onchange="applyFilters()">
+        <option value="">Todos os Status</option>
+        <option value="Dentro do Guideline">✅ Dentro do Guideline</option>
+        <option value="Fora do Guideline">❌ Fora do Guideline</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" onclick="clearFilters()">✕ Limpar</button>
+      <button class="btn btn-blue btn-sm" onclick="loadHistory()" style="margin-left:auto">🔄 Atualizar</button>
+    </div>
+  </div>
+
+  <div id="histList" class="hist-list">
+    <div class="empty-state">
+      <div class="ei">📂</div>
+      <h3>Clique em Atualizar para carregar</h3>
+      <p>Os registros serão buscados diretamente do Google Sheets.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════
+   GUIDELINE DATA
+══════════════════════════════════════════════════ */
+const GUIDELINE = {
+  'CNU':{'SP & DF':{'Plantão 12h - Baixa Complexidade':125.46,'Plantão 12h - Alta Complexidade':145.63,'Plantão 6 Horas':67.21,'Fisioterapia':36.59,'Fonoaudiologia':59.74,'Terapia Ocupacional':59.74,'Nutrição':36.59,'Psicologia':41.07,'Visita Enfermagem':56.76,'Procedimentos Enfermagem':56.76,'Procedimentos Técnico Enf':43.31,'Curativo':40.33,'Antibioticoterapia':33.61,'Visita Estomaterapia':89.62},'SSA':{'Plantão 12h - Baixa Complexidade':106.05,'Plantão 12h - Alta Complexidade':115.75,'Plantão 6 Horas':67.21,'Fisioterapia':36.59,'Fonoaudiologia':59.74,'Terapia Ocupacional':59.74,'Nutrição':36.59,'Psicologia':41.07,'Visita Enfermagem':56.76,'Procedimentos Enfermagem':56.76,'Procedimentos Técnico Enf':43.31,'Curativo':40.33,'Antibioticoterapia':33.61,'Visita Estomaterapia':89.62}},
+  'Prevent Senior':{'ID 24H VM':{'Plantão 12h - Baixa Complexidade':106.3,'Fisioterapia':25.1,'Fonoaudiologia':59.74,'Visita Médica':134.6,'Nutrição':36.1,'Terapia Ocupacional':59.74,'Visita Enfermagem':35.8},'ID 24H':{'Plantão 12h - Baixa Complexidade':134.4,'Fisioterapia':31.8,'Fonoaudiologia':93,'Visita Médica':170.2,'Nutrição':45.6,'Terapia Ocupacional':59.74,'Visita Enfermagem':45.3},'ID 12H':{'Plantão 12h - Baixa Complexidade':110.6,'Fisioterapia':29.1,'Fonoaudiologia':85.1,'Visita Médica':155.8,'Nutrição':41.7,'Visita Enfermagem':41.5},'AD':{'Fisioterapia':45.02,'Fonoaudiologia':95.22,'Antibioticoterapia':35.50,'Procedimento (Enfermagem)':50.16}},
+  'SP Capital':{'São Paulo (Capital)':{'Plantão 12h - Baixa Complexidade':163,'Plantão 12h - Alta Complexidade':175,'Plantão 6 Horas':89,'Fisioterapia':42,'Fonoaudiologia':124,'Psicologia':57,'Terapia Ocupacional':167,'Visita Médica':227,'Visita Enfermagem':60,'Nutrição':65}},
+  'Unimed SJ Rio Preto':{'São José do Rio Preto':{'Plantão 12h - Baixa Complexidade':150,'Plantão 12h - Alta Complexidade':180,'Fisioterapia':50,'Fonoaudiologia':100,'Terapia Ocupacional':120,'Nutrição':55,'Visita Médica':200,'Psicologia':160,'Visita Enfermagem':50},'Mirassol':{'Plantão 12h - Baixa Complexidade':150,'Plantão 12h - Alta Complexidade':180,'Fisioterapia':50,'Fonoaudiologia':100,'Terapia Ocupacional':120,'Nutrição':55,'Visita Médica':200,'Psicologia':160,'Visita Enfermagem':50},'Valinhos':{'Plantão 12h - Baixa Complexidade':150,'Plantão 12h - Alta Complexidade':180,'Fisioterapia':50,'Fonoaudiologia':100,'Terapia Ocupacional':120,'Nutrição':55,'Visita Médica':200,'Psicologia':160,'Visita Enfermagem':50},'São Paulo':{'Plantão 12h - Baixa Complexidade':150,'Plantão 12h - Alta Complexidade':180,'Fisioterapia':50,'Fonoaudiologia':100,'Terapia Ocupacional':120,'Nutrição':55,'Visita Médica':200,'Psicologia':160,'Visita Enfermagem':50},'Campinas':{'Plantão 12h - Baixa Complexidade':150,'Plantão 12h - Alta Complexidade':180,'Fisioterapia':50,'Fonoaudiologia':100,'Terapia Ocupacional':120,'Nutrição':55,'Visita Médica':200,'Psicologia':160,'Visita Enfermagem':50},'Sorocaba':{'Plantão 12h - Baixa Complexidade':150,'Plantão 12h - Alta Complexidade':180,'Fisioterapia':50,'Fonoaudiologia':100,'Terapia Ocupacional':120,'Nutrição':55,'Visita Médica':200,'Psicologia':160,'Visita Enfermagem':50},'Olímpia':{'Plantão 12h - Baixa Complexidade':170,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':60,'Fonoaudiologia':123,'Terapia Ocupacional':120,'Nutrição':65,'Visita Médica':250,'Psicologia':170,'Visita Enfermagem':65},'Poloni':{'Plantão 12h - Baixa Complexidade':170,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':60,'Fonoaudiologia':123,'Terapia Ocupacional':120,'Nutrição':65,'Visita Médica':250,'Psicologia':170,'Visita Enfermagem':65},'José Bonifácio':{'Plantão 12h - Baixa Complexidade':170,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':60,'Fonoaudiologia':123,'Terapia Ocupacional':120,'Nutrição':65,'Visita Médica':250,'Psicologia':170,'Visita Enfermagem':65},'Nova Granada':{'Plantão 12h - Baixa Complexidade':170,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':60,'Fonoaudiologia':123,'Terapia Ocupacional':120,'Nutrição':65,'Visita Médica':250,'Psicologia':170,'Visita Enfermagem':65},'São Vicente':{'Plantão 12h - Baixa Complexidade':170,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':60,'Fonoaudiologia':123,'Terapia Ocupacional':120,'Nutrição':65,'Visita Médica':250,'Psicologia':170,'Visita Enfermagem':65},'Cruzeiro':{'Plantão 12h - Baixa Complexidade':170,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':65,'Fonoaudiologia':118,'Terapia Ocupacional':130,'Nutrição':60,'Visita Médica':250,'Psicologia':150,'Visita Enfermagem':60},'Palestina':{'Plantão 12h - Baixa Complexidade':170,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':65,'Fonoaudiologia':118,'Terapia Ocupacional':130,'Nutrição':60,'Visita Médica':250,'Psicologia':150,'Visita Enfermagem':60},'Nhandeara':{'Plantão 12h - Baixa Complexidade':170,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':65,'Fonoaudiologia':118,'Terapia Ocupacional':130,'Nutrição':60,'Visita Médica':250,'Psicologia':150,'Visita Enfermagem':60},'Fernandópolis':{'Plantão 12h - Baixa Complexidade':170,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':65,'Fonoaudiologia':118,'Terapia Ocupacional':130,'Nutrição':60,'Visita Médica':250,'Psicologia':150,'Visita Enfermagem':60},'Valentim Gentil':{'Plantão 12h - Baixa Complexidade':170,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':65,'Fonoaudiologia':118,'Terapia Ocupacional':130,'Nutrição':60,'Visita Médica':250,'Psicologia':150,'Visita Enfermagem':60},'Matão':{'Plantão 12h - Baixa Complexidade':170,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':65,'Fonoaudiologia':118,'Terapia Ocupacional':130,'Nutrição':60,'Visita Médica':250,'Psicologia':150,'Visita Enfermagem':60},'Icém':{'Plantão 12h - Baixa Complexidade':170,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':65,'Fonoaudiologia':118,'Terapia Ocupacional':130,'Nutrição':60,'Visita Médica':250,'Psicologia':150,'Visita Enfermagem':60},'Barretos':{'Plantão 12h - Baixa Complexidade':170,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':65,'Fonoaudiologia':118,'Terapia Ocupacional':130,'Nutrição':60,'Visita Médica':250,'Psicologia':150,'Visita Enfermagem':60},'Cardoso':{'Plantão 12h - Baixa Complexidade':180,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':70,'Fonoaudiologia':110,'Terapia Ocupacional':100,'Nutrição':65,'Visita Médica':200,'Psicologia':145,'Visita Enfermagem':50},'Jaú':{'Plantão 12h - Baixa Complexidade':180,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':70,'Fonoaudiologia':110,'Terapia Ocupacional':100,'Nutrição':65,'Visita Médica':200,'Psicologia':145,'Visita Enfermagem':50},'Votuporanga':{'Plantão 12h - Baixa Complexidade':180,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':70,'Fonoaudiologia':110,'Terapia Ocupacional':100,'Nutrição':65,'Visita Médica':200,'Psicologia':145,'Visita Enfermagem':50},'Jales':{'Plantão 12h - Baixa Complexidade':180,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':70,'Fonoaudiologia':110,'Terapia Ocupacional':100,'Nutrição':65,'Visita Médica':200,'Psicologia':145,'Visita Enfermagem':50},'Urânia':{'Plantão 12h - Baixa Complexidade':180,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':70,'Fonoaudiologia':110,'Terapia Ocupacional':100,'Nutrição':65,'Visita Médica':200,'Psicologia':145,'Visita Enfermagem':50},'Monte Aprazível':{'Plantão 12h - Baixa Complexidade':180,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':70,'Fonoaudiologia':110,'Terapia Ocupacional':100,'Nutrição':65,'Visita Médica':200,'Psicologia':145,'Visita Enfermagem':50},'Jaboticabal':{'Plantão 12h - Baixa Complexidade':180,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':70,'Fonoaudiologia':110,'Terapia Ocupacional':100,'Nutrição':65,'Visita Médica':200,'Psicologia':145,'Visita Enfermagem':50},'Araçatuba':{'Plantão 12h - Baixa Complexidade':180,'Plantão 12h - Alta Complexidade':190,'Fisioterapia':70,'Fonoaudiologia':110,'Terapia Ocupacional':100,'Nutrição':65,'Visita Médica':200,'Psicologia':145,'Visita Enfermagem':50},'Santa Fé do Sul':{'Plantão 12h - Baixa Complexidade':200,'Plantão 12h - Alta Complexidade':215,'Fisioterapia':70,'Fonoaudiologia':110,'Terapia Ocupacional':150,'Nutrição':70,'Visita Médica':250,'Psicologia':190,'Visita Enfermagem':70},'Paranaíba':{'Plantão 12h - Baixa Complexidade':200,'Plantão 12h - Alta Complexidade':215,'Fisioterapia':70,'Fonoaudiologia':110,'Terapia Ocupacional':150,'Nutrição':70,'Visita Médica':250,'Psicologia':190,'Visita Enfermagem':70},'Três Lagoas':{'Plantão 12h - Baixa Complexidade':200,'Plantão 12h - Alta Complexidade':215,'Fisioterapia':70,'Fonoaudiologia':110,'Terapia Ocupacional':150,'Nutrição':70,'Visita Médica':250,'Psicologia':190,'Visita Enfermagem':70}},
+  'Unimed Goiás':{'Goiânia':{'Plantão 12h - Baixa Complexidade':160,'Plantão 12h - Alta Complexidade':180,'Fisioterapia':46,'Fonoaudiologia':100,'Terapia Ocupacional':120,'Nutrição':47.5,'Visita Médica':275,'Psicologia':70,'Visita Enfermagem':52.5},'Aparecida de Goiânia':{'Plantão 12h - Baixa Complexidade':160,'Plantão 12h - Alta Complexidade':180,'Fisioterapia':46,'Fonoaudiologia':100,'Terapia Ocupacional':120,'Nutrição':47.5,'Visita Médica':275,'Psicologia':70,'Visita Enfermagem':52.5},'Anápolis':{'Plantão 12h - Baixa Complexidade':160,'Plantão 12h - Alta Complexidade':180,'Fisioterapia':46,'Fonoaudiologia':100,'Terapia Ocupacional':120,'Nutrição':47.5,'Visita Médica':275,'Psicologia':70,'Visita Enfermagem':52.5},'Rio Verde':{'Plantão 12h - Baixa Complexidade':150,'Plantão 12h - Alta Complexidade':170,'Fisioterapia':42,'Fonoaudiologia':90,'Terapia Ocupacional':110,'Nutrição':50,'Visita Médica':250,'Psicologia':70,'Visita Enfermagem':55},'Jataí':{'Plantão 12h - Baixa Complexidade':150,'Plantão 12h - Alta Complexidade':170,'Fisioterapia':42,'Fonoaudiologia':90,'Terapia Ocupacional':110,'Nutrição':50,'Visita Médica':250,'Psicologia':70,'Visita Enfermagem':55},'Catalão':{'Plantão 12h - Baixa Complexidade':150,'Plantão 12h - Alta Complexidade':170,'Fisioterapia':42,'Fonoaudiologia':90,'Terapia Ocupacional':110,'Nutrição':50,'Visita Médica':250,'Psicologia':70,'Visita Enfermagem':55},'Formosa':{'Plantão 12h - Baixa Complexidade':150,'Plantão 12h - Alta Complexidade':170,'Fisioterapia':42,'Fonoaudiologia':90,'Terapia Ocupacional':110,'Nutrição':50,'Visita Médica':250,'Psicologia':70,'Visita Enfermagem':55},'Itumbiara':{'Plantão 12h - Baixa Complexidade':150,'Plantão 12h - Alta Complexidade':170,'Fisioterapia':42,'Fonoaudiologia':90,'Terapia Ocupacional':110,'Nutrição':50,'Visita Médica':250,'Psicologia':70,'Visita Enfermagem':55},'Águas Lindas de Goiás':{'Plantão 12h - Baixa Complexidade':140,'Plantão 12h - Alta Complexidade':170,'Fisioterapia':45,'Fonoaudiologia':90,'Terapia Ocupacional':120,'Nutrição':60,'Visita Médica':250,'Psicologia':75,'Visita Enfermagem':55},'Luziânia':{'Plantão 12h - Baixa Complexidade':140,'Plantão 12h - Alta Complexidade':170,'Fisioterapia':45,'Fonoaudiologia':90,'Terapia Ocupacional':120,'Nutrição':60,'Visita Médica':250,'Psicologia':75,'Visita Enfermagem':55},'Valparaíso de Goiás':{'Plantão 12h - Baixa Complexidade':140,'Plantão 12h - Alta Complexidade':170,'Fisioterapia':45,'Fonoaudiologia':90,'Terapia Ocupacional':120,'Nutrição':60,'Visita Médica':250,'Psicologia':75,'Visita Enfermagem':55},'Senador Canedo':{'Plantão 12h - Baixa Complexidade':140,'Plantão 12h - Alta Complexidade':170,'Fisioterapia':45,'Fonoaudiologia':90,'Terapia Ocupacional':120,'Nutrição':60,'Visita Médica':250,'Psicologia':75,'Visita Enfermagem':55}}
+};
+
+/* ══ STATE ══ */
+let rows=[], curOp='', curCidade='', allHistory=[];
+const STORAGE_KEY = 'calc_script_url';
+
+/* ══ UTILS ══ */
+const brl=v=>(v===null||v===undefined||isNaN(v))?'—':Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const parseMask=s=>{if(!s||!s.trim())return null;const n=parseFloat(s.replace(/\./g,'').replace(',','.'));return isNaN(n)?null:n;};
+const applyMask=i=>{const d=i.value.replace(/\D/g,'');if(!d){i.value='';return;}i.value=(parseInt(d)/100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});};
+const rowStatus=r=>(!r.qty||r.qty===0||r.realUnit===null)?'pending':r.realUnit*r.qty<=r.guideUnit*r.qty?'ok':'fail';
+const badge=s=>{if(s==='fail'||s==='Reprovado')return'<span class="badge badge-fail">❌ Fora do Guideline</span>';return'<span class="badge badge-ok">✅ Dentro do Guideline</span>';};
+const fmtDate=ts=>{try{return new Date(ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch(e){return String(ts||'—');}};
+function showToast(msg,type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;setTimeout(()=>t.className='toast',3500);}
+function showLoading(t){document.getElementById('loadingText').textContent=t||'Aguarde...';document.getElementById('loadingOverlay').style.display='flex';}
+function hideLoading(){document.getElementById('loadingOverlay').style.display='none';}
+
+/* ══ SCRIPT URL ══ */
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyjpLIRICb2-dUNgTWC0ENMY6ujtKccXlo2rHgTd2aR-9djVMya7XfgIllvtzTo2LFJ/exec';
+function getScriptUrl(){return SCRIPT_URL;}
+
+/* ══ INIT ══ */
+window.addEventListener('DOMContentLoaded',()=>{});
+
+/* ══ TABS ══ */
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='hist' && !allHistory.length){
+    loadHistory();
+  }
+}
+
+/* ══ SELECTOR ══ */
+function onOpChange(){
+  const op=document.getElementById('selOp').value;
+  const sel=document.getElementById('selCidade');
+  if(!op||!GUIDELINE[op]){sel.innerHTML='<option value="">— Selecione a Operadora —</option>';sel.disabled=true;return;}
+  sel.disabled=false;
+  sel.innerHTML=Object.keys(GUIDELINE[op]).map(c=>`<option>${c}</option>`).join('');
+}
+
+/* ══ LOAD CALC ══ */
+function loadCalc(){
+  const op=document.getElementById('selOp').value;
+  const cidade=document.getElementById('selCidade').value;
+  if(!op){showToast('Selecione uma Operadora.','error');return;}
+  if(!cidade){showToast('Selecione uma Cidade.','error');return;}
+  curOp=op;curCidade=cidade;
+  rows=Object.entries(GUIDELINE[op][cidade]).map(([serv,guideUnit])=>({serv,guideUnit,qty:null,realUnit:null}));
+  document.getElementById('guideBox').style.display='none';
+  document.getElementById('tableSection').style.display='';
+  document.getElementById('totalSection').style.display='';
+  document.getElementById('saveBar').style.display='';
+  document.getElementById('tableLabel').textContent=`${op} › ${cidade}`;
+  renderTable();updateTotal();
+}
+
+/* ══ TABLE ══ */
+function renderTable(){
+  let html=`<table class="calc-table fade-in"><thead><tr>
+    <th style="width:26%">Serviço</th>
+    <th class="c" style="width:9%">Qtd<small>Sessões</small></th>
+    <th class="r" style="width:12%">Unit.<small>Guideline</small></th>
+    <th class="r" style="width:13%">Total<small>Guideline</small></th>
+    <th class="r" style="width:13%">Unit.<small>Fidelizado ✏️</small></th>
+    <th class="r" style="width:13%">Total<small>Fidelizado</small></th>
+    <th class="r" style="width:9%">Diferença</th>
+    <th class="c" style="width:9%">Status</th>
+  </tr></thead><tbody>`;
+  rows.forEach((r,i)=>{html+=buildRow(r,i);});
+  html+=`</tbody></table>`;
+  document.getElementById('tableArea').innerHTML=html;
+}
+function buildRow(r,i){
+  const qty=r.qty||0,gT=r.guideUnit*qty,rT=r.realUnit!==null?r.realUnit*qty:null,diff=rT!==null?gT-rT:null;
+  const st=rowStatus(r),dCls=diff===null?'c-muted':diff>=0?'c-green':'c-red';
+  const dTxt=diff!==null&&qty>0?(diff>=0?'+':'')+brl(Math.abs(diff)):'—';
+  const rDisp=r.realUnit!==null?Number(r.realUnit).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'';
+  return`<tr data-i="${i}">
+    <td>${r.serv}</td>
+    <td class="c"><input type="number" min="0" step="1" class="inp-qty" placeholder="0" value="${r.qty!==null?r.qty:''}" onchange="onQty(${i},this.value)" oninput="onQty(${i},this.value)"></td>
+    <td class="r"><span class="mono c-blue">${brl(r.guideUnit)}</span></td>
+    <td class="r" data-cell="gT"><span class="mono c-blue">${qty>0?brl(gT):'—'}</span></td>
+    <td class="r"><input type="text" inputmode="decimal" class="inp-real" placeholder="0,00" value="${rDisp}" oninput="onRealInput(event,${i})" onblur="onRealBlur(${i},this.value)"></td>
+    <td class="r" data-cell="rT"><span class="mono c-pink">${rT!==null&&qty>0?brl(rT):'—'}</span></td>
+    <td class="r" data-cell="diff"><span class="mono ${dCls}">${dTxt}</span></td>
+    <td class="c" data-cell="status">${badge(st)}</td>
+  </tr>`;
+}
+function onQty(i,v){const n=parseInt(v,10);rows[i].qty=(!v||isNaN(n)||n<0)?null:n;patchRow(i);updateTotal();}
+function onRealInput(e,i){applyMask(e.target);rows[i].realUnit=parseMask(e.target.value);patchRow(i);updateTotal();}
+function onRealBlur(i,v){rows[i].realUnit=parseMask(v);patchRow(i);updateTotal();}
+function patchRow(i){
+  const r=rows[i],qty=r.qty||0,gT=r.guideUnit*qty,rT=r.realUnit!==null?r.realUnit*qty:null,diff=rT!==null?gT-rT:null,st=rowStatus(r);
+  const tr=document.querySelector(`tr[data-i="${i}"]`);if(!tr)return;
+  tr.querySelector('[data-cell=gT]').innerHTML=`<span class="mono c-blue">${qty>0?brl(gT):'—'}</span>`;
+  tr.querySelector('[data-cell=rT]').innerHTML=`<span class="mono c-pink">${rT!==null&&qty>0?brl(rT):'—'}</span>`;
+  const dCls=diff===null?'c-muted':diff>=0?'c-green':'c-red';
+  tr.querySelector('[data-cell=diff]').innerHTML=`<span class="mono ${dCls}">${diff!==null&&qty>0?(diff>=0?'+':'')+brl(Math.abs(diff)):'—'}</span>`;
+  tr.querySelector('[data-cell=status]').innerHTML=badge(st);
+}
+function updateTotal(){
+  const tg=rows.reduce((s,r)=>s+r.guideUnit*(r.qty||0),0);
+  const tf=rows.reduce((s,r)=>s+(r.realUnit!==null?r.realUnit*(r.qty||0):0),0);
+  const td=tg-tf;
+  const gs=rows.every(r=>rowStatus(r)==='ok')?'ok':rows.some(r=>rowStatus(r)==='fail')?'fail':'pending';
+  document.getElementById('tot-guide').textContent=brl(tg);
+  document.getElementById('tot-fid').textContent=brl(tf);
+  const el=document.getElementById('tot-diff');
+  el.textContent=tg>0||tf>0?(td>=0?'+':'')+brl(Math.abs(td)):'—';
+  el.className='total-val '+(td>=0?'pos':'neg');
+  const stEl=document.getElementById('tot-status');
+  stEl.className='badge '+(gs==='fail'?'badge-fail':'badge-ok');
+  stEl.textContent=gs==='ok'?'✅ Dentro do Guideline':gs==='fail'?'❌ Fora do Guideline':'✅ Dentro do Guideline';
+}
+function clearInputs(){if(!rows.length)return;if(!confirm('Limpar?'))return;rows.forEach(r=>{r.qty=null;r.realUnit=null;});renderTable();updateTotal();}
+function exportCSV(){
+  if(!rows.length){showToast('Nada para exportar.','error');return;}
+  const h=['Operadora','Cidade','Serviço','Qtd','Unit Guide','Total Guide','Unit Fid','Total Fid','Diferença','Status'];
+  const lines=[h.join(';')];
+  rows.forEach(r=>{
+    const qty=r.qty||0,gT=r.guideUnit*qty,rT=r.realUnit!==null?r.realUnit*qty:'',df=rT!==''?gT-rT:'',st=rowStatus(r)==='ok'?'Aprovado':rowStatus(r)==='fail'?'Reprovado':'Pendente';
+    lines.push([curOp,curCidade,r.serv,qty,String(r.guideUnit).replace('.',','),String(gT.toFixed(2)).replace('.',','),r.realUnit!==null?String(r.realUnit).replace('.',','):'',rT!==''?String(rT.toFixed(2)).replace('.',','):'',df!==''?String(df.toFixed(2)).replace('.',','):'',st].join(';'));
+  });
+  const blob=new Blob(['\uFEFF'+lines.join('\n')],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`calc-${curOp}-${curCidade}.csv`.replace(/[\s\/]/g,'-');a.click();
+}
+
+/* ══ JSONP HELPER ══ */
+function jsonp(url, params, onSuccess, onError){
+  const cbName='_cb'+Date.now()+'_'+Math.floor(Math.random()*9999);
+  const timeout=setTimeout(()=>{
+    cleanup();
+    if(onError) onError('Timeout — verifique a URL do Apps Script');
+  }, 15000);
+  function cleanup(){
+    delete window[cbName];
+    const s=document.getElementById(cbName);
+    if(s) s.remove();
+    clearTimeout(timeout);
+  }
+  window[cbName]=function(data){
+    cleanup();
+    if(onSuccess) onSuccess(data);
+  };
+  const p=Object.assign({}, params, {callback:cbName});
+  const qs=Object.keys(p).map(k=>encodeURIComponent(k)+'='+encodeURIComponent(String(p[k]??''))).join('&');
+  const s=document.createElement('script');
+  s.id=cbName;
+  s.src=url+(url.includes('?')?'&':'?')+qs;
+  s.onerror=function(){ cleanup(); if(onError) onError('Falha ao carregar script'); };
+  document.head.appendChild(s);
+}
+
+/* ══ EXCECAO TOGGLE ══ */
+function onExcecaoChange(){
+  const v=document.getElementById('selExcecao').value;
+  const g=document.getElementById('justificativaGroup');
+  g.style.display=v?'':'none';
+  if(!v) document.getElementById('inpJustificativa').value='';
+}
+
+/* ══════════════════════════════════════════════
+   SAVE → Google Sheets via Apps Script POST
+══════════════════════════════════════════════ */
+async function saveRecord(){
+  if(!rows.length){showToast('Carregue uma calculadora primeiro.','error');return;}
+  const pac=document.getElementById('inpPaciente').value.trim();
+  const resp=document.getElementById('selResp').value;
+  const excecao=document.getElementById('selExcecao').value;
+  const justificativa=document.getElementById('inpJustificativa').value.trim();
+  if(!pac){showToast('Informe o nome do paciente.','error');return;}
+  if(!resp){showToast('Selecione o responsável.','error');return;}
+  if(excecao==='Negociação Pontual'&&!justificativa){showToast('Informe a justificativa da Negociação Pontual.','error');return;}
+  const url=getScriptUrl();
+  if(!url){showToast('Erro: URL do Apps Script não configurada.','error');return;}
+
+  const tg=rows.reduce((s,r)=>s+r.guideUnit*(r.qty||0),0);
+  const tf=rows.reduce((s,r)=>s+(r.realUnit!==null?r.realUnit*(r.qty||0):0),0);
+  const td=tg-tf;
+  let gs=rows.every(r=>rowStatus(r)==='ok')?'Dentro do Guideline':rows.some(r=>rowStatus(r)==='fail')?'Fora do Guideline':'Dentro do Guideline';
+  // Negociação Pontual sobrescreve o status para Dentro do Guideline
+  if(excecao==='Negociação Pontual') gs='Dentro do Guideline';
+  const srvs=rows.filter(r=>r.qty&&r.qty>0).map(r=>({
+    serv:r.serv,guideUnit:r.guideUnit,qty:r.qty,realUnit:r.realUnit,
+    gTotal:+(r.guideUnit*(r.qty||0)).toFixed(2),
+    rTotal:r.realUnit!==null?+(r.realUnit*(r.qty||0)).toFixed(2):null,
+    diff:r.realUnit!==null?+(r.guideUnit*(r.qty||0)-r.realUnit*(r.qty||0)).toFixed(2):null,
+    status:rowStatus(r)==='ok'?'Dentro do Guideline':rowStatus(r)==='fail'?'Fora do Guideline':'Dentro do Guideline'
+  }));
+
+  // servicosJson omitido do save para não estourar o limite de URL
+  const payload={
+    action:'save',
+    paciente:pac,
+    responsavel:resp,
+    operadora:String(curOp||''),
+    cidade:String(curCidade||''),
+    status:gs,
+    excecao:excecao||'',
+    justificativa:justificativa||'',
+    totalGuide:String(+tg.toFixed(2)),
+    totalFid:String(+tf.toFixed(2)),
+    diff:String(+td.toFixed(2)),
+    servicosJson:JSON.stringify(srvs).substring(0,800)
+  };
+
+  const btn=document.getElementById('btnSave');
+  btn.disabled=true;
+  showLoading('Salvando na planilha...');
+
+  jsonp(url, payload, function(data){
+    hideLoading();
+    btn.disabled=false;
+    if(data && data.success){
+      showToast(`✅ Salvo: ${pac} (${resp})`,'success');
+      document.getElementById('inpPaciente').value='';
+      document.getElementById('selResp').value='';
+      document.getElementById('selExcecao').value='';
+      document.getElementById('inpJustificativa').value='';
+      document.getElementById('justificativaGroup').style.display='none';
+    }else{
+      showToast('Erro ao salvar: '+((data&&data.error)||'sem resposta'),'error');
+    }
+  }, function(err){
+    hideLoading();
+    btn.disabled=false;
+    showToast('Erro de conexão: '+err,'error');
+  });
+}
+
+/* ══════════════════════════════════════════════
+   LOAD HISTORY → Google Sheets via Apps Script GET
+══════════════════════════════════════════════ */
+async function loadHistory(){
+  const url=getScriptUrl();
+  if(!url){showToast('Erro: URL do Apps Script não configurada.','error');return;}
+  showLoading('Carregando histórico...');
+  jsonp(url, {action:'get'}, function(data){
+    hideLoading();
+    if(data && data.success){
+      allHistory=data.records||[];
+      document.getElementById('histCount').textContent=allHistory.length;
+      applyFilters();
+      showToast(`${allHistory.length} registro(s) carregado(s).`,'success');
+    }else{
+      const msg=(data&&data.error)||'Erro desconhecido';
+      document.getElementById('histList').innerHTML=`<div class="empty-state"><div class="ei">⚠️</div><h3>Erro ao carregar</h3><p>${msg}</p><button class="btn btn-blue btn-sm" onclick="loadHistory()" style="margin-top:14px">🔄 Tentar novamente</button></div>`;
+      showToast('Erro: '+msg,'error');
+    }
+  }, function(err){
+    hideLoading();
+    document.getElementById('histList').innerHTML=`<div class="empty-state"><div class="ei">⚠️</div><h3>Erro de conexão</h3><p>${err}</p><button class="btn btn-blue btn-sm" onclick="loadHistory()" style="margin-top:14px">🔄 Tentar novamente</button></div>`;
+    showToast('Erro de conexão','error');
+  });
+}
+
+/* ══ FILTERS ══ */
+function applyFilters(){
+  const pac=(document.getElementById('filtPac').value||'').toLowerCase();
+  const resp=document.getElementById('filtResp').value;
+  const op=document.getElementById('filtOp').value;
+  const status=document.getElementById('filtStatus').value;
+  const filtered=allHistory.filter(r=>{
+    if(pac   &&!(r.paciente||'').toLowerCase().includes(pac)) return false;
+    if(resp  && r.responsavel!==resp)  return false;
+    if(op    && r.operadora!==op)      return false;
+    if(status&& r.status!==status)     return false;
+    return true;
+  });
+  renderHistList(filtered);
+}
+function clearFilters(){['filtPac','filtResp','filtOp','filtStatus'].forEach(id=>document.getElementById(id).value='');applyFilters();}
+
+/* ══ RENDER HISTORY ══ */
+function renderHistList(records){
+  const c=document.getElementById('histList');
+  if(!records.length){
+    c.innerHTML='<div class="empty-state"><div class="ei">📂</div><h3>Nenhum registro encontrado</h3><p>Ajuste os filtros ou clique em Atualizar.</p></div>';
+    return;
+  }
+  c.innerHTML=records.map(rec=>{
+    let srvs=[];
+    try{
+      const parsed=JSON.parse(rec.servicosJson||'[]');
+      srvs=Array.isArray(parsed)?parsed:[];
+    }catch(e){srvs=[];}
+    const tRows=srvs.map(s=>{
+      const dCls=(s.diff||0)>=0?'c-green':'c-red';
+      return`<tr>
+        <td style="font-size:12px">${s.serv}</td>
+        <td class="r">${s.qty||'—'}</td>
+        <td class="r">${brl(s.guideUnit)}</td>
+        <td class="r">${brl(s.gTotal)}</td>
+        <td class="r">${s.realUnit!==null?brl(s.realUnit):'—'}</td>
+        <td class="r">${s.rTotal!==null?brl(s.rTotal):'—'}</td>
+        <td class="r"><span class="${dCls}">${s.diff!==null?(s.diff>=0?'+':'')+brl(Math.abs(s.diff)):'—'}</span></td>
+        <td>${badge(s.status)}</td>
+      </tr>`;
+    }).join('');
+    const tableHtml=srvs.length?`<table class="hist-table"><thead><tr>
+      <th>Serviço</th><th class="r">Qtd</th><th class="r">Unit.G</th><th class="r">Tot.G</th>
+      <th class="r">Unit.F</th><th class="r">Tot.F</th><th class="r">Dif.</th><th>Status</th>
+    </tr></thead><tbody>${tRows}</tbody></table>`:'<p style="color:var(--muted);font-size:12px;margin-bottom:14px">Sem serviços com quantidade.</p>';
+    const td=Number(rec.diff)||0;
+    return`<div class="hist-card fade-in">
+      <div class="hist-card-header">
+        <div>
+          <div class="hist-card-name">👤 ${rec.paciente||'—'}</div>
+          <div class="hist-card-meta">
+            <span class="chip">${rec.operadora||'—'}</span>
+            <span class="chip">${rec.cidade||'—'}</span>
+            <span class="chip purple">${rec.responsavel||'—'}</span>
+            <span style="font-size:11px;color:var(--muted)">${fmtDate(rec.dataRegistro)}</span>
+          </div>
+        </div>
+        <div>${badge(rec.status||'Pendente')}</div>
+      </div>
+      <div class="hist-card-body">
+        ${tableHtml}
+        <div class="hist-totals">
+          <div class="htot-col"><span class="htot-label">Total Guideline</span><span class="htot-val">${brl(Number(rec.totalGuide))}</span></div>
+          <div class="htot-col"><span class="htot-label">Total Fidelizado</span><span class="htot-val">${brl(Number(rec.totalFid))}</span></div>
+          <div class="htot-col"><span class="htot-label">Diferença</span><span class="htot-val ${td>=0?'pos':'neg'}">${td>=0?'+':''}${brl(Math.abs(td))}</span></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
